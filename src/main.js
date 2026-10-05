@@ -3,9 +3,22 @@ import './style.css'
 const app = document.querySelector('#app')
 
 app.innerHTML = `
-  <button id="undoButton">Undo</button>
-  <button id="redoButton">Redo</button>
-  <button id="clearButton">Clear</button>
+  <div id="controls">
+    <button id="undoButton">Undo</button>
+    <button id="redoButton">Redo</button>
+    <button id="clearButton">Clear</button>
+
+    <label>
+      Stroke width:
+      <input
+        id="strokeWidth"
+        type="range"
+        min="1"
+        max="20"
+        value="4"
+      >
+    </label>
+  </div>
 
   <canvas id="canvas"></canvas>
 `
@@ -15,6 +28,14 @@ const ctx = canvas.getContext('2d')
 const undoButton = document.querySelector('#undoButton')
 const redoButton = document.querySelector('#redoButton')
 const clearButton = document.querySelector('#clearButton')
+const strokeWidthInput = document.querySelector('#strokeWidth')
+
+undoButton.addEventListener('click', undo)
+redoButton.addEventListener('click', redo)
+clearButton.addEventListener('click', clearCanvas)
+strokeWidthInput.addEventListener('input', (event) => {
+  strokeWidth = Number(event.target.value)
+})
 
 function clearCanvas() {
   strokes.length = 0
@@ -30,10 +51,6 @@ function clearCanvas() {
 
   console.log('After clear:', strokes)
 }
-
-undoButton.addEventListener('click', undo)
-redoButton.addEventListener('click', redo)
-clearButton.addEventListener('click', clearCanvas)
 
 function resizeCanvas() {
   const rect = canvas.getBoundingClientRect()
@@ -55,7 +72,7 @@ const strokes = []
 const redoStrokes = []
 
 let currentStroke = null
-
+let strokeWidth = 4
 
 function redrawCanvas() {
   ctx.clearRect(
@@ -67,6 +84,8 @@ function redrawCanvas() {
 
   for (const stroke of strokes) {
     if (stroke.points.length === 0) continue
+
+    ctx.lineWidth = stroke.width
 
     ctx.beginPath()
 
@@ -121,8 +140,13 @@ canvas.addEventListener('pointerdown', (event) => {
   const point = getCanvasPoint(event)
 
   currentStroke = {
-    points: [point]
+    points: [point],
+    width: strokeWidth
   }
+
+  ctx.lineWidth = strokeWidth
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
 
   ctx.beginPath()
   ctx.moveTo(point.x, point.y)

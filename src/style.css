@@ -15,12 +15,25 @@ canvas {
   touch-action: none;
 }
 
-button {
-  position: relative;
+#controls {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+
   z-index: 10;
 
-  margin: 10px 0 0 10px;
-  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 
+  padding: 8px;
+}
+
+button {
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+label {
   font-size: 14px;
 }
