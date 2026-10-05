@@ -3,11 +3,29 @@ import './style.css'
 const app = document.querySelector('#app')
 
 app.innerHTML = `
+  <button id="clearButton">Clear</button>
   <canvas id="canvas"></canvas>
 `
 
 const canvas = document.querySelector('#canvas')
 const ctx = canvas.getContext('2d')
+const clearButton = document.querySelector('#clearButton')
+
+function clearCanvas() {
+  strokes.length = 0
+  currentStroke = null
+
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  )
+
+  console.log('After clear:', strokes)
+}
+
+clearButton.addEventListener('click', clearCanvas)
 
 function resizeCanvas() {
   const rect = canvas.getBoundingClientRect()
@@ -65,6 +83,8 @@ canvas.addEventListener('pointermove', (event) => {
 
 canvas.addEventListener('pointerup', (event) => {
   finishStroke(event)
+
+  console.log('Current strokes:', strokes)
 })
 
 canvas.addEventListener('pointercancel', (event) => {
