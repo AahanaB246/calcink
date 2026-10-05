@@ -3,16 +3,22 @@ import './style.css'
 const app = document.querySelector('#app')
 
 app.innerHTML = `
+  <button id="undoButton">Undo</button>
+  <button id="redoButton">Redo</button>
   <button id="clearButton">Clear</button>
+
   <canvas id="canvas"></canvas>
 `
 
 const canvas = document.querySelector('#canvas')
 const ctx = canvas.getContext('2d')
+const undoButton = document.querySelector('#undoButton')
+const redoButton = document.querySelector('#redoButton')
 const clearButton = document.querySelector('#clearButton')
 
 function clearCanvas() {
   strokes.length = 0
+  redoStrokes.length = 0
   currentStroke = null
 
   ctx.clearRect(
@@ -25,6 +31,8 @@ function clearCanvas() {
   console.log('After clear:', strokes)
 }
 
+undoButton.addEventListener('click', undo)
+redoButton.addEventListener('click', redo)
 clearButton.addEventListener('click', clearCanvas)
 
 function resizeCanvas() {
@@ -44,7 +52,57 @@ window.addEventListener('resize', resizeCanvas)
 let isDrawing = false
 
 const strokes = []
+const redoStrokes = []
+
 let currentStroke = null
+
+
+function redrawCanvas() {
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  )
+
+  for (const stroke of strokes) {
+    if (stroke.points.length === 0) continue
+
+    ctx.beginPath()
+
+    const firstPoint = stroke.points[0]
+
+    ctx.moveTo(firstPoint.x, firstPoint.y)
+
+    for (let i = 1; i < stroke.points.length; i++) {
+      const point = stroke.points[i]
+
+      ctx.lineTo(point.x, point.y)
+    }
+
+    ctx.stroke()
+  }
+}
+
+function undo() {
+  if (strokes.length === 0) return
+
+  const stroke = strokes.pop()
+
+  redoStrokes.push(stroke)
+
+  redrawCanvas()
+}
+
+function redo() {
+  if (redoStrokes.length === 0) return
+
+  const stroke = redoStrokes.pop()
+
+  strokes.push(stroke)
+
+  redrawCanvas()
+}
 
 function getCanvasPoint(event) {
   const rect = canvas.getBoundingClientRect()
@@ -98,6 +156,7 @@ function finishStroke(event) {
 
   if (currentStroke && currentStroke.points.length > 0) {
     strokes.push(currentStroke)
+    redoStrokes.length = 0
   }
 
   currentStroke = null
